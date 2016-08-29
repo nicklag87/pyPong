@@ -23,13 +23,10 @@ enemyPaddle = pygame.Rect(380, 100, 10, 40)
 ball = pygame.Rect(200, 125, 10, 10)
 
 speed = 2
-ballSpeed = random.randint(-1, 2)
 
-# fix ball speed if 0
-if ballSpeed == 0:
-    ballSpeed = 1
 
-enemyPaddleSpeed = 1
+
+enemyPaddleSpeed = 2
 
 ballDirX = random.randint(-1, 4)
 ballDirY = random.randint(-1, 4)
@@ -39,21 +36,43 @@ ballExist = False
 
 # text
 pygame.font.init()
-myfont = pygame.font.SysFont(None, 20)
-mytext = myfont.render('You scored a point!', 1, (255, 100, 100))
-playerScoreTextPos = (10, 0)
+score = 0
+
+def createScore():
+    scoreText = str(score)
+
+    myfont = pygame.font.SysFont(None, 40)
+    mytext = myfont.render(scoreText, 1, (255, 100, 100))
+    playerScoreTextPos = (100, 10)
+    # blit score
+    screen.blit(mytext, playerScoreTextPos)
+
+
+enemyScore = 0
+
+def createEnemScore():
+    eScoreText = str(enemyScore)
+
+    myfont = pygame.font.SysFont(None, 40)
+    mytext = myfont.render(eScoreText, 1, (255, 100, 100))
+    playerScoreTextPos = (300, 10)
+    # blit score
+    screen.blit(mytext, playerScoreTextPos)
+
 
 # functions
 def drawBall(ball):
     pygame.draw.rect(screen, playerBlack, ball)
 
 def moveBall(ball, ballDirX, ballDirY):
+    if ballDirX == 0:
+        ballDirX = 1
+        ball.y += ballDirX
+    if ballDirY == 0:
+        ballDirY = 1
+        ball.y += ballDirY
     ball.x += ballDirX
     ball.y += ballDirY
-    if ballDirX == 0:
-        ball.x += ballSpeed
-    if ballDirY == 0:
-        ball.y += ballSpeed
 
     return ball
 
@@ -107,6 +126,10 @@ while True:
     screen.fill(white)
 
 
+    # blit scores
+    createScore()
+    createEnemScore()
+
 
     pygame.draw.rect(screen, playerBlack, paddle)
     pygame.draw.rect(screen, enemBlack, enemyPaddle)
@@ -114,19 +137,28 @@ while True:
     if ball.left >= 400 - ball.height:
         print("player 2 missed")
         ballExist = False
-        screen.blit(mytext, playerScoreTextPos)
-        time.sleep(3)
+        score = score + 1
         ball = pygame.Rect(200, 125, 10, 10)
         ballDirX = random.randint(-1, 2)
         ballDirY = random.randint(-1, 2)
-        ballSpeed = 2
+        if ballDirX == 0:
+            ballDirX = 1
+            ball.y += ballDirX
+        if ballDirY == 0:
+            ballDirY = 1
+            ball.y += ballDirY
     elif ball.right <= 0:
         print("player 1 missed")
-        time.sleep(3)
+        enemyScore = enemyScore + 1
         ball = pygame.Rect(200, 125, 10, 10)
         ballDirX = random.randint(-1, 2)
         ballDirY = random.randint(-1, 2)
-        ballSpeed = 2
+        if ballDirX == 0:
+            ballDirX = 1
+            ball.y += ballDirX
+        if ballDirY == 0:
+            ballDirY = 1
+            ball.y += ballDirY
     else:
         drawBall(ball)
         moveBall(ball, ballDirX, ballDirY)
@@ -134,11 +166,8 @@ while True:
 
 
 
-    # wall collision
-    if ball.top >= 250 - ball.height:
-        ballDirY = -ballDirY
-    if ball.top <= 0:
-        ballDirY = -ballDirY
+    enemPaddleAI(enemyPaddle, ball, ballDirX)
+
 
 
 
@@ -168,4 +197,12 @@ while True:
 
 
 
-    enemPaddleAI(enemyPaddle, ball, ballDirX)
+
+    # wall collision
+    if ball.bottom >= 250:
+        ballDirY = -ballDirY
+    if ball.top <= 0:
+        ballDirY = -ballDirY
+
+
+
