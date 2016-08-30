@@ -1,18 +1,15 @@
-import pygame, sys, random, time
+import pygame, sys, random
 
 
 # initialize pygame
 pygame.init()
-
-test = 1
-
 
 # set up screen, paddles, and ball variables
 playerBlack = (0, 0, 0)
 enemBlack = (0, 0, 0)
 black = (0, 0, 0)
 white = (255, 255, 255)
-pause = False
+
 
 screen = pygame.display.set_mode((400, 250))
 pygame.display.set_caption("Pong")
@@ -31,8 +28,6 @@ enemyPaddleSpeed = 2
 ballDirX = random.randint(-1, 4)
 ballDirY = random.randint(-1, 4)
 
-# check for ball's existence
-ballExist = False
 
 # text
 pygame.font.init()
@@ -102,6 +97,19 @@ def addOne(ballDirX):
     return ballDirX
 
 
+def ifMoving(ballDirY):
+    if collision == True and key("UP"):
+        ballDirY -= 1
+        if ballDirY == 0:
+            ballDirY -= 1
+
+    if collision == True and key("DOWN"):
+        ballDirY += 1
+        if ballDirY == 0:
+            ballDirY += 1
+    return ballDirY
+
+# game loop
 while True:
     if pygame.event.get(pygame.QUIT) or key("ESCAPE"):
         pygame.quit()
@@ -118,11 +126,7 @@ while True:
         else:
             paddle.y += speed
 
-
-
-
-
-
+    # clear screen
     screen.fill(white)
 
 
@@ -130,13 +134,13 @@ while True:
     createScore()
     createEnemScore()
 
-
+    # draw paddles
     pygame.draw.rect(screen, playerBlack, paddle)
     pygame.draw.rect(screen, enemBlack, enemyPaddle)
 
+    # track missed balls and generate new ball
     if ball.left >= 400 - ball.height:
         print("player 2 missed")
-        ballExist = False
         score = score + 1
         ball = pygame.Rect(200, 125, 10, 10)
         ballDirX = random.randint(-1, 2)
@@ -162,7 +166,6 @@ while True:
     else:
         drawBall(ball)
         moveBall(ball, ballDirX, ballDirY)
-        ballExist = True
 
 
 
@@ -194,6 +197,9 @@ while True:
         ballDirX = -ballDirX
     elif enemCollision == False:
         enemBlack = (0, 0, 0)
+
+    # paddles movement effects speed and direction of ball
+    ballDirY = ifMoving(ballDirY)
 
 
 
