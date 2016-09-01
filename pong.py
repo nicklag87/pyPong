@@ -1,4 +1,4 @@
-import pygame, sys, random
+import os, pygame, sys, random
 
 
 # initialize pygame
@@ -20,18 +20,47 @@ enemyPaddle = pygame.Rect(380, 100, 10, 40)
 ball = pygame.Rect(200, 125, 10, 10)
 
 speed = 2
-
-
-
 enemyPaddleSpeed = 2
+
+enemyScore = 0
 
 ballDirX = random.randint(-1, 4)
 ballDirY = random.randint(-1, 4)
 
-
 # text
 pygame.font.init()
 score = 0
+
+# death text
+deathTextFont = pygame.font.SysFont(None, 40)
+deathText = deathTextFont.render("dead", 1, (0, 0, 0))
+deathTextPos = (150, 100)
+
+# death image
+try:
+    grimReaper = pygame.image.load("/Users/nicholaslagerstedt/PycharmProjects/aug7th2016/grim_reaper.bmp")
+except pygame.error, message:
+    print("Could not load grim reaper image.")
+
+# sound
+try:
+    sound = pygame.mixer.Sound("/Users/nicholaslagerstedt/PycharmProjects/aug7th2016/4390__noisecollector__pongblipf-4.wav")
+except pygame.error, message:
+    print("Cannot load 'blip' sound.")
+
+try:
+    miss = pygame.mixer.Sound("/Users/nicholaslagerstedt/PycharmProjects/aug7th2016/miss_pong_fx.aif")
+except pygame.error, message:
+    print("Could not load 'miss' sound.")
+
+try:
+    scorePoint = pygame.mixer.Sound("/Users/nicholaslagerstedt/PycharmProjects/aug7th2016/pong_win_sound.aif")
+except pygame.error, message:
+    print("Could not load 'score' sound.")
+
+
+
+
 
 def createScore():
     scoreText = str(score)
@@ -43,7 +72,9 @@ def createScore():
     screen.blit(mytext, playerScoreTextPos)
 
 
-enemyScore = 0
+
+
+
 
 def createEnemScore():
     eScoreText = str(enemyScore)
@@ -109,6 +140,11 @@ def ifMoving(ballDirY):
             ballDirY += 1
     return ballDirY
 
+
+def flicker():
+    screen.blit(grimReaper, (0, 0))
+
+
 # game loop
 while True:
     if pygame.event.get(pygame.QUIT) or key("ESCAPE"):
@@ -141,6 +177,7 @@ while True:
     # track missed balls and generate new ball
     if ball.left >= 400 - ball.height:
         print("player 2 missed")
+        scorePoint.play()
         score = score + 1
         ball = pygame.Rect(200, 125, 10, 10)
         ballDirX = random.randint(-1, 2)
@@ -153,6 +190,9 @@ while True:
             ball.y += ballDirY
     elif ball.right <= 0:
         print("player 1 missed")
+        miss.play()
+        screen.blit(deathText, deathTextPos)
+        flicker()
         enemyScore = enemyScore + 1
         ball = pygame.Rect(200, 125, 10, 10)
         ballDirX = random.randint(-1, 2)
@@ -185,6 +225,7 @@ while True:
         print collision
         playerBlack = (255, 0, 0)
         ballDirX = -ballDirX
+        sound.play()
     elif collision == False:
         playerBlack = (0, 0, 0)
 
@@ -195,6 +236,7 @@ while True:
         print(ballDirX)
         enemBlack = (255, 0, 0)
         ballDirX = -ballDirX
+        sound.play()
     elif enemCollision == False:
         enemBlack = (0, 0, 0)
 
